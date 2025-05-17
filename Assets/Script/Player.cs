@@ -9,10 +9,14 @@ public class Player : MonoBehaviour
     [SerializeField] private float speed = 20;
     private float horizontal;
     private float vertical;
+    private bool run;
+    private float runSpeed = 40;
+    private bool isMoving = false;
+
 
     private Rigidbody2D rb;
 
-    public TextMeshPro pointTextMesh;
+    public TextMeshProUGUI pointTextMesh;
     public List<Point> pointList;
     public List<Transform> buildingTransformList;
 
@@ -27,6 +31,7 @@ public class Player : MonoBehaviour
     {
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
+        run = Input.GetKey(KeyCode.LeftShift);
 
         HandlePoints();
 
@@ -34,6 +39,18 @@ public class Player : MonoBehaviour
         {
             HandleBuildingInteraction();
         }
+
+        if (speed != 0)
+        {
+            isMoving = true;
+
+            if (isMoving && run)
+            {
+                speed = runSpeed;
+            }
+        }
+
+
     }
 
     private void FixedUpdate()
@@ -42,14 +59,16 @@ public class Player : MonoBehaviour
         rb.MovePosition(rb.position + movement * speed * Time.deltaTime);
     }
 
+
+
     private void HandlePoints()
     {
         foreach (Point point in pointList)
         {
             if (point != null)
             {
-                float distanceToCollect = 1.5f;
-                if (Vector3.Distance(transform.position, point.transform.position) > distanceToCollect)
+                float distanceToCollect = 1f;
+                if (Vector3.Distance(transform.position, point.transform.position) < distanceToCollect)
                 {
                     AddPoint();
                     point.DestroySelf();
@@ -65,17 +84,17 @@ public class Player : MonoBehaviour
         {
             Transform buildingTransform = buildingTransformList[i];
             float interactionDistance = 2f;
-            if (Vector3.Distance(transform.position, buildingTransform.position) > interactionDistance)
+            if (Vector3.Distance(transform.position, buildingTransform.position) < interactionDistance)
             {
                 switch (buildingTransform.name)
                 {
                     case "BuildPoint1x":
-                        AddPoint();
+                        RemovePoint();
                         break;
                     case "BuildPoint3x":
-                        AddPoint();
-                        AddPoint();
-                        AddPoint();
+                        RemovePoint();
+                        RemovePoint();
+                        RemovePoint();
                         break;
                     default:
                         break;
@@ -87,6 +106,11 @@ public class Player : MonoBehaviour
     private void AddPoint()
     {
         pointAmount++;
+        pointTextMesh.text = pointAmount.ToString();
+    }
+    private void RemovePoint()
+    {
+        pointAmount--;
         pointTextMesh.text = pointAmount.ToString();
     }
 }
